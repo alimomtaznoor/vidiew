@@ -1,0 +1,6 @@
+{
+  "databaseURL": "https://Noor-ali-Momtaz-s-workspace-g6jdms.us-east-1.xata.sh/db/vidiewdb",
+  "codegen": {
+    "output": "src/xata.ts"
+  }
+}
