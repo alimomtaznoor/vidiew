@@ -1,16 +1,16 @@
 "use client"
-import { redirect } from "next/navigation";
+// import { redirect } from "next/navigation";
 import Hero from "@/components/Hero";
 
-import { createAuthClient } from "better-auth/react";
+// import { createAuthClient } from "better-auth/react";
 
-const { useSession } = createAuthClient();
+// const { useSession } = createAuthClient();
 
 const HomePage = () => {
-  const { data: session } = useSession();
-  if (session?.user) {
-    redirect("/publications");
-  }
+  // const { data: session } = useSession();
+  // if (session?.user) {
+  //   redirect("/publications");
+  // }
 
   return <Hero />;
 };
