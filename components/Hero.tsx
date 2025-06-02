@@ -71,7 +71,7 @@ export default function Hero() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Header */}
-      <header className="relative z-10 px-4 lg:px-6 h-20 flex items-center border-b border-slate-200/60 bg-white/80 backdrop-blur-md">
+      {/* <header className="relative z-10 px-4 lg:px-6 h-20 flex items-center border-b border-slate-200/60 bg-white/80 backdrop-blur-md">
         <Link href="/" className="flex items-center justify-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
             <Video className="w-6 h-6 text-white" />
@@ -90,15 +90,15 @@ export default function Hero() {
             onClick={() => router.push("/sign-in")}
           >
             Sign In
-          </Button>
+          </Button> */}
           {/* <Button
             size="sm"
             className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg"
           >
             Get Started
           </Button> */}
-        </nav>
-      </header>
+        {/* </nav>
+      </header> */}
 
       {/* Hero Section */}
       <main className="relative">
