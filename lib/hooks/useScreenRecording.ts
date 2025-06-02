@@ -22,21 +22,11 @@ export const useScreenRecording = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
-  if (audioContextRef.current && audioContextRef.current.state !== "closed") {
-    audioContextRef.current.close().catch(console.error);
-  }
-
   useEffect(() => {
     return () => {
       stopRecording();
-      if (state.recordedVideoUrl) URL.revokeObjectURL(state.recordedVideoUrl);
-
-      if (
-        audioContextRef.current &&
-        audioContextRef.current.state !== "closed"
-      ) {
-        audioContextRef.current.close().catch(console.error);
-      }
+      // if (state.recordedVideoUrl) URL.revokeObjectURL(state.recordedVideoUrl);
+      // audioContextRef.current?.close().catch(console.error);
     };
   }, [state.recordedVideoUrl]);
 

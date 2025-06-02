@@ -153,11 +153,11 @@ export default function Hero() {
               {/* Stats */}
               <div className="flex flex-wrap justify-center gap-8 pt-8">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-slate-900">2M+</div>
+                  <div className="text-3xl font-bold text-slate-900">20+</div>
                   <div className="text-sm text-slate-600">Videos Created</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-slate-900">50K+</div>
+                  <div className="text-3xl font-bold text-slate-900">12+</div>
                   <div className="text-sm text-slate-600">Happy Users</div>
                 </div>
                 <div className="text-center">
@@ -175,9 +175,9 @@ export default function Hero() {
                   <div className="aspect-video bg-gradient-to-br from-slate-900 to-slate-700 rounded-2xl flex items-center justify-center relative overflow-hidden">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.1)_0%,transparent_70%)]"></div>
                     <div className="text-center space-y-4 z-10">
-                      <div className="w-20 h-20 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 cursor-pointer shadow-lg">
+                      {/* <div className="w-20 h-20 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 cursor-pointer shadow-lg">
                         <Play className="w-8 h-8 text-white ml-1" />
-                      </div>
+                      </div> */}
                       <div>
                         <p className="text-white text-xl font-semibold">
                           See Vidiew in Action

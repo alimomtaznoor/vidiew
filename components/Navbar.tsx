@@ -42,7 +42,7 @@ const Navbar = () => {
                 return await authClient.signOut({
                   fetchOptions: {
                     onSuccess: () => {
-                      redirect("/sign-in")
+                      redirect("/")
                     },
                   },
                 })

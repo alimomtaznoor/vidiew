@@ -8,6 +8,7 @@ import { updateURLParams } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Upload } from "lucide-react"
 import Link from "next/link"
+import RecordScreen from "./RecordScreen"
 
 interface SharedHeaderProps {
   subHeader: string
@@ -81,7 +82,9 @@ const SharedHeader = ({ subHeader, title, userImg }: SharedHeaderProps) => {
               <span>Upload a video</span>
             </Button>
           </Link>
-          <DropdownList />
+          <RecordScreen />
+      
+        
         </div>
       </section>
       <section className="flex flex-col md:flex-row md:items-center gap-5 justify-between">

@@ -8,9 +8,15 @@ export async function middleware(request: NextRequest) {
     headers: await headers(),
   });
 
+  // if (session?.user) {
+  //   return NextResponse.redirect(new URL("/publications" , request.url));
+  // }
+
   // if (!session) {
   //   return NextResponse.redirect(new URL("/sign-in" , request.url));
   // }
+
+
 
   return NextResponse.next();
 }
