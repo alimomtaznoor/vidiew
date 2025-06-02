@@ -16,7 +16,7 @@ const SignIn = () => {
             width={32}
             height={32}
           />
-          <h1>SnapCast</h1>
+          <h1>Vidiew</h1>
         </Link>
 
         <div className="description">

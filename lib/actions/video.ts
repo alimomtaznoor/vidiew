@@ -14,7 +14,7 @@ import {
   withErrorHandling,
 } from "@/lib/utils";
 import { BUNNY } from "@/constants";
-// import aj, { fixedWindow, request } from "../arcjet";
+import aj, { fixedWindow, request } from "../arcjet";
 
 // Constants with full names
 const VIDEO_STREAM_BASE_URL = BUNNY.STREAM_BASE_URL;
@@ -26,21 +26,21 @@ const ACCESS_KEYS = {
   storageAccessKey: getEnv("BUNNY_STORAGE_ACCESS_KEY"),
 };
 
-// const validateWithArcjet = async (fingerPrint: string) => {
-//   const rateLimit = aj.withRule(
-//     fixedWindow({
-//       mode: "LIVE",
-//       window: "1m",
-//       max: 2,
-//       characteristics: ["fingerprint"],
-//     })
-//   );
-//   const req = await request();
-//   const decision = await rateLimit.protect(req, { fingerprint: fingerPrint });
-//   if (decision.isDenied()) {
-//     throw new Error("Rate Limit Exceeded");
-//   }
-// };
+const validateWithArcjet = async (fingerPrint: string) => {
+  const rateLimit = aj.withRule(
+    fixedWindow({
+      mode: "LIVE",
+      window: "1m",
+      max: 2,
+      characteristics: ["fingerprint"],
+    })
+  );
+  const req = await request();
+  const decision = await rateLimit.protect(req, { fingerprint: fingerPrint });
+  if (decision.isDenied()) {
+    throw new Error("Rate Limit Exceeded");
+  }
+};
 
 // Helper functions with descriptive names
 const revalidatePaths = (paths: string[]) => {
@@ -99,7 +99,7 @@ export const getThumbnailUploadUrl = withErrorHandling(
 export const saveVideoDetails = withErrorHandling(
   async (videoDetails: VideoDetails) => {
     const userId = await getSessionUserId();
-    // await validateWithArcjet(userId);
+    await validateWithArcjet(userId);
     await apiFetch(
       `${VIDEO_STREAM_BASE_URL}/${BUNNY_LIBRARY_ID}/videos/${videoDetails.videoId}`,
       {
@@ -243,7 +243,7 @@ export const getAllVideosByUser = withErrorHandling(
 
 export const updateVideoVisibility = withErrorHandling(
   async (videoId: string, visibility: Visibility) => {
-    // await validateWithArcjet(videoId);
+    await validateWithArcjet(videoId);
     await db
       .update(videos)
       .set({ visibility, updatedAt: new Date() })

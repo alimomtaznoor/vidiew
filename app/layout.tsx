@@ -1,7 +1,9 @@
+import type React from "react";
 import type { Metadata } from "next";
 import { Karla } from "next/font/google";
 import "./globals.css";
 import { satoshi } from "../fonts/font";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const geistKarla = Karla({
   variable: "--font-geist-karla",
@@ -9,10 +11,10 @@ const geistKarla = Karla({
 });
 
 export const metadata: Metadata = {
-  title: "SnapCast",
-  description: "A Screen Sharing App",
+  title: "Vidiew",
+  description: "Video Sharing and Screen Recording Platform",
   icons: {
-    icon: "/assets/icons/logo.svg",
+    icon: "/favicon.ico",
   },
 };
 
@@ -26,7 +28,14 @@ export default function Layout({
       <body
         className={`${geistKarla.variable} ${satoshi.variable} font-karla antialiased`}
       >
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

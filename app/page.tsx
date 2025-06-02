@@ -1,9 +1,18 @@
-import React from 'react'
+"use client"
+import { redirect } from "next/navigation";
+import Hero from "@/components/Hero";
 
-const Page = () => {
-  return (
-    <div>Page</div>
-  )
-}
+import { createAuthClient } from "better-auth/react";
 
-export default Page
+const { useSession } = createAuthClient();
+
+const HomePage = () => {
+  const { data: session } = useSession();
+  if (session?.user) {
+    redirect("/publications");
+  }
+
+  return <Hero />;
+};
+
+export default HomePage;
