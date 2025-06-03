@@ -8,9 +8,9 @@ export async function middleware(request: NextRequest) {
     headers: await headers(),
   });
 
-  if (session?.user) {
-    return NextResponse.redirect(new URL("/media" , request.url));
-  }
+  // if (session?.user) {
+  //   return NextResponse.redirect(new URL("/media" , request.url));
+  // }
 
   if (!session) {
     return NextResponse.redirect(new URL("/" , request.url));
