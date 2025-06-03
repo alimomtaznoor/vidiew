@@ -6,6 +6,8 @@ import { Video } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
 
+
+
 const SignIn = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -48,7 +50,7 @@ const SignIn = () => {
               onClick={async () => {
                 return await authClient.signIn.social({
                   provider: "google",
-                  callbackURL: "/media"
+                  callbackURL: "/media",
                 });
               }}
               className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300 rounded-xl px-6 py-4 transition-all duration-200 hover:shadow-lg group"
@@ -62,6 +64,27 @@ const SignIn = () => {
               />
               <span className="font-semibold text-slate-700">
                 Continue with Google
+              </span>
+            </button>
+
+            <button
+              onClick={async () => {
+                return await authClient.signIn.social({
+                  provider: "github",
+                  callbackURL: "/media",
+                });
+              }}
+              className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300 rounded-xl px-6 py-4 transition-all duration-200 hover:shadow-lg group"
+            >
+              <Image
+                src="/assets/icons/github.svg"
+                alt="GitHub Icon"
+                width={24}
+                height={24}
+                className="group-hover:scale-110 transition-transform duration-200"
+              />
+              <span className="font-semibold text-slate-700">
+                Continue with GitHub
               </span>
             </button>
           </div>
