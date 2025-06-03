@@ -1,16 +1,16 @@
-"use client"
-import Link from "next/link"
-import { redirect, useRouter } from "next/navigation"
-import { Video, LogOut } from "lucide-react"
+"use client";
+import Link from "next/link";
+import { redirect, useRouter } from "next/navigation";
+import { Video, LogOut } from "lucide-react";
 
-import { authClient } from "@/lib/auth-client"
-import ImageWithFallback from "./ImageWithFallback"
-import { Button } from "@/components/ui/button"
+import { authClient } from "@/lib/auth-client";
+import ImageWithFallback from "./ImageWithFallback";
+import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
-  const router = useRouter()
-  const { data: session } = authClient.useSession()
-  const user = session?.user
+  const router = useRouter();
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
 
   return (
     <header className="relative z-10 px-4 lg:px-6 h-20 flex items-center border-b border-slate-200/60 bg-white/80 backdrop-blur-md">
@@ -24,9 +24,12 @@ const Navbar = () => {
           </span>
         </Link>
 
-        {user && (
+        {user ? (
           <div className="flex items-center gap-4">
-            <button onClick={() => router.push(`/profile/${session?.user.id}`)} className="flex items-center gap-2">
+            <button
+              onClick={() => router.push(`/profile/${session?.user.id}`)}
+              className="flex items-center gap-2"
+            >
               <ImageWithFallback
                 src={session?.user.image ?? ""}
                 alt="User"
@@ -42,10 +45,10 @@ const Navbar = () => {
                 return await authClient.signOut({
                   fetchOptions: {
                     onSuccess: () => {
-                      redirect("/")
+                      redirect("/");
                     },
                   },
-                })
+                });
               }}
               className="text-slate-600 hover:text-indigo-600"
             >
@@ -53,10 +56,19 @@ const Navbar = () => {
               Sign Out
             </Button>
           </div>
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-slate-600 hover:text-indigo-600"
+            onClick={() => router.push("/sign-in")}
+          >
+            Sign In
+          </Button>
         )}
       </nav>
     </header>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;
