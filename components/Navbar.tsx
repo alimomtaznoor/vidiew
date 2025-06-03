@@ -42,13 +42,8 @@ const Navbar = () => {
               variant="ghost"
               size="sm"
               onClick={async () => {
-                return await authClient.signOut({
-                  fetchOptions: {
-                    onSuccess: () => {
-                      redirect("/");
-                    },
-                  },
-                });
+                await authClient.signOut();
+                router.push("/");
               }}
               className="text-slate-600 hover:text-indigo-600"
             >
