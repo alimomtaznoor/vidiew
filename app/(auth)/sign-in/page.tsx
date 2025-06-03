@@ -48,6 +48,7 @@ const SignIn = () => {
               onClick={async () => {
                 return await authClient.signIn.social({
                   provider: "google",
+                  callbackURL: "/media"
                 });
               }}
               className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300 rounded-xl px-6 py-4 transition-all duration-200 hover:shadow-lg group"
