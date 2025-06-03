@@ -1,24 +1,21 @@
 "use client";
 import { useRouter } from "next/navigation";
 import Hero from "@/components/Hero";
-
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
 const HomePage = () => {
   const router = useRouter();
-  const { data: session, isPending: loading } = authClient.useSession();
-  const user = session?.user;
-  useEffect(() => {
-    if (!loading) {
-      if (user) {
-        router.push("/media");
-      }
-    }
-  }, [session, loading]);
+  const { data: session, isPending } = authClient.useSession();
 
-  if (loading) {
-    return <div>Loading...</div>;
+  useEffect(() => {
+    if (!isPending && session?.user) {
+      router.replace("/media"); 
+    }
+  }, [isPending, session, router]);
+
+  if (isPending || session?.user) {
+    return null;
   }
 
   return <Hero />;
