@@ -51,8 +51,8 @@ export const videos = pgTable("videos", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   videoUrl: text("video_url").notNull(),
-  videoId: text("video_id").notNull(),
-  thumbnailUrl: text("thumbnail_url").notNull(),
+  assetId: text("asset_id").notNull(),
+  playbackId: text("playback_id").notNull(),
   visibility: text("visibility").$type<"public" | "private">().notNull(),
   userId: text("user_id")
     .notNull()
@@ -64,5 +64,5 @@ export const videos = pgTable("videos", {
 }); 
 
 export const schema = {
-    user, session, account, verification
+    user, session, account, verification, videos
 }

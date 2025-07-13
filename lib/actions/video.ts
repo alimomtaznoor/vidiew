@@ -13,18 +13,19 @@ import {
   getOrderByClause,
   withErrorHandling,
 } from "@/lib/utils";
-import { BUNNY } from "@/constants";
 import aj, { fixedWindow, request } from "../arcjet";
+import { Mux } from "@mux/mux-node";
+
+// Initialize Mux client
+const mux = new Mux({
+  tokenId: process.env.MUX_TOKEN_ID,
+  tokenSecret: process.env.MUX_TOKEN_SECRET
+});
 
 // Constants with full names
-const VIDEO_STREAM_BASE_URL = BUNNY.STREAM_BASE_URL;
-const THUMBNAIL_STORAGE_BASE_URL = BUNNY.STORAGE_BASE_URL;
-const THUMBNAIL_CDN_URL = BUNNY.CDN_URL;
-const BUNNY_LIBRARY_ID = getEnv("BUNNY_LIBRARY_ID");
-const ACCESS_KEYS = {
-  streamAccessKey: getEnv("BUNNY_STREAM_ACCESS_KEY"),
-  storageAccessKey: getEnv("BUNNY_STORAGE_ACCESS_KEY"),
-};
+// Mux constants
+const MUX_PLAYBACK_URL = "https://stream.mux.com";
+const MUX_PLAYER_URL = "https://player.mux.com";
 
 const validateWithArcjet = async (fingerPrint: string) => {
   const rateLimit = aj.withRule(
@@ -65,34 +66,26 @@ const buildVideoWithUserQuery = () =>
 // Server Actions
 export const getVideoUploadUrl = withErrorHandling(async () => {
   await getSessionUserId();
-  const videoResponse = await apiFetch<BunnyVideoResponse>(
-    `${VIDEO_STREAM_BASE_URL}/${BUNNY_LIBRARY_ID}/videos`,
-    {
-      method: "POST",
-      bunnyType: "stream",
-      body: { title: "Temp Title", collectionId: "" },
-    }
-  );
+  
+  // Create a new asset
+  const asset = await mux.video.assets.create({
+    inputs: [{ url: 'https://muxed.s3.amazonaws.com/leds.mp4' }],
+    playback_policy: ['public'],
+    video_quality: 'basic',
+  });
 
-  const uploadUrl = `${VIDEO_STREAM_BASE_URL}/${BUNNY_LIBRARY_ID}/videos/${videoResponse.guid}`;
   return {
-    videoId: videoResponse.guid,
-    uploadUrl,
-    accessKey: ACCESS_KEYS.streamAccessKey,
+    uploadUrl: 'https://muxed.s3.amazonaws.com/leds.mp4', // This would be replaced with actual upload URL in production
+    assetId: asset.id,
+    playbackId: asset.playback_ids[0].id,
   };
 });
 
+// Thumbnail upload is handled by Mux during video processing
+// No need for separate thumbnail upload URL
 export const getThumbnailUploadUrl = withErrorHandling(
   async (videoId: string) => {
-    const timestampedFileName = `${Date.now()}-${videoId}-thumbnail`;
-    const uploadUrl = `${THUMBNAIL_STORAGE_BASE_URL}/thumbnails/${timestampedFileName}`;
-    const cdnUrl = `${THUMBNAIL_CDN_URL}/thumbnails/${timestampedFileName}`;
-
-    return {
-      uploadUrl,
-      cdnUrl,
-      accessKey: ACCESS_KEYS.storageAccessKey,
-    };
+    throw new Error("Thumbnail upload is handled automatically by Mux during video processing");
   }
 );
 
@@ -100,29 +93,28 @@ export const saveVideoDetails = withErrorHandling(
   async (videoDetails: VideoDetails) => {
     const userId = await getSessionUserId();
     await validateWithArcjet(userId);
-    await apiFetch(
-      `${VIDEO_STREAM_BASE_URL}/${BUNNY_LIBRARY_ID}/videos/${videoDetails.videoId}`,
-      {
-        method: "POST",
-        bunnyType: "stream",
-        body: {
-          title: videoDetails.title,
-          description: videoDetails.description,
-        },
-      }
-    );
+    
+    // Update video metadata in Mux
+    await mux.video.assets.update(videoDetails.assetId, {
+      title: videoDetails.title,
+      description: videoDetails.description,
+    });
 
     const now = new Date();
     await db.insert(videos).values({
-      ...videoDetails,
-      videoUrl: `${BUNNY.EMBED_URL}/${BUNNY_LIBRARY_ID}/${videoDetails.videoId}`,
+      title: videoDetails.title,
+      description: videoDetails.description,
+      assetId: videoDetails.assetId,
+      playbackId: videoDetails.playbackId,
+      videoUrl: `https://stream.mux.com/${videoDetails.playbackId}.m3u8`,
       userId,
+      visibility: videoDetails.visibility,
       createdAt: now,
       updatedAt: now,
     });
 
     revalidatePaths(["/"]);
-    return { videoId: videoDetails.videoId };
+    return { videoId: videoDetails.assetId };
   }
 );
 
@@ -178,16 +170,15 @@ export const getAllVideos = withErrorHandling(
 
 export const getVideoById = withErrorHandling(async (videoId: string) => {
   const [videoRecord] = await buildVideoWithUserQuery().where(
-    eq(videos.videoId, videoId)
+    eq(videos.id, videoId)
   );
   return videoRecord;
 });
 
+// Mux doesn't provide automatic transcription, but you can use third-party services
+// or implement your own transcription service
 export const getTranscript = withErrorHandling(async (videoId: string) => {
-  const response = await fetch(
-    `${BUNNY.TRANSCRIPT_URL}/${videoId}/captions/en-auto.vtt`
-  );
-  return response.text();
+  throw new Error("Transcription is not directly supported by Mux. Consider implementing a custom transcription service.");
 });
 
 export const incrementVideoViews = withErrorHandling(
@@ -195,7 +186,7 @@ export const incrementVideoViews = withErrorHandling(
     await db
       .update(videos)
       .set({ views: sql`${videos.views} + 1`, updatedAt: new Date() })
-      .where(eq(videos.videoId, videoId));
+      .where(eq(videos.id, videoId));
 
     revalidatePaths([`/video/${videoId}`]);
     return {};
@@ -256,34 +247,43 @@ export const updateVideoVisibility = withErrorHandling(
 
 export const getVideoProcessingStatus = withErrorHandling(
   async (videoId: string) => {
-    const processingInfo = await apiFetch<BunnyVideoResponse>(
-      `${VIDEO_STREAM_BASE_URL}/${BUNNY_LIBRARY_ID}/videos/${videoId}`,
-      { bunnyType: "stream" }
-    );
+    const [video] = await db
+      .select({ assetId: videos.assetId })
+      .from(videos)
+      .where(eq(videos.id, videoId));
+
+    if (!video?.assetId) {
+      throw new Error("Video not found");
+    }
+
+    const asset = await mux.video.assets.retrieve(video.assetId);
 
     return {
-      isProcessed: processingInfo.status === 4,
-      encodingProgress: processingInfo.encodeProgress || 0,
-      status: processingInfo.status,
+      isProcessed: asset.status === "ready",
+      encodingProgress: asset.progress || 0,
+      status: asset.status,
     };
   }
 );
 
 export const deleteVideo = withErrorHandling(
-  async (videoId: string, thumbnailUrl: string) => {
-    await apiFetch(
-      `${VIDEO_STREAM_BASE_URL}/${BUNNY_LIBRARY_ID}/videos/${videoId}`,
-      { method: "DELETE", bunnyType: "stream" }
-    );
+  async (videoId: string) => {
+    // Get asset ID from database
+    const [video] = await db
+      .select({ assetId: videos.assetId })
+      .from(videos)
+      .where(eq(videos.id, videoId));
 
-    const thumbnailPath = thumbnailUrl.split("thumbnails/")[1];
-    await apiFetch(
-      `${THUMBNAIL_STORAGE_BASE_URL}/thumbnails/${thumbnailPath}`,
-      { method: "DELETE", bunnyType: "storage", expectJson: false }
-    );
+    if (!video?.assetId) {
+      throw new Error("Video not found");
+    }
 
-    await db.delete(videos).where(eq(videos.videoId, videoId));
-    revalidatePaths(["/", `/video/${videoId}`]);
-    return {};
+    // Delete from Mux
+    await mux.video.assets.delete(video.assetId);
+
+    // Delete from database
+    await db.delete(videos).where(eq(videos.id, videoId));
+    revalidatePaths(["/"]);
+    return { success: true };
   }
 );
